@@ -1,4 +1,8 @@
 streamlit
 tensorflow
+opencv-python-headless
+scikit-image
+joblib
+matplotlib
+Pillow
 scikit-learn
-opencv-python
