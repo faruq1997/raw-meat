@@ -1,38 +1,45 @@
 import streamlit as st
-import tensorflow as tf
-import joblib
+from tensorflow.keras.models import load_model
 import cv2
 import numpy as np
-from sklearn.metrics import accuracy_score
+from PIL import Image
+from skimage.feature import greycomatrix, greycoprops
+import joblib
+import matplotlib.pyplot as plt
 
-# Load models
-resnet_model = tf.keras.models.load_model('./resnet.h5')
-gradientboost_model = joblib.load('./gradientboost.pkl')
+# Load deep learning model
+deep_learning_model = load_model('./mobilenet_86persen.h5')
 
-# Function to preprocess image for ResNet model
-def preprocess_image_resnet(image):
-    img = cv2.imread(image)
-    img = cv2.resize(img, (224, 224))
-    img = img / 255.0
-    img = np.expand_dims(img, axis=0)
-    return img
+# Load machine learning model
+loaded_model = joblib.load('./best_adaboost.pkl')
 
-# Function to preprocess image for Gradient Boosting model (GLCM extraction)
-def preprocess_image_gb(image):
-    img = cv2.imread(image)
-    # Perform GLCM extraction and other necessary preprocessing steps
-    # Replace this with your GLCM extraction and preprocessing logic
-    return img
+labels = ['babi', 'kambing', 'sapi']
+img_size_224p = (224, 224)
 
-# Function for classification
-def classify_image(image):
-    resnet_input = preprocess_image_resnet(image)
-    resnet_prediction = resnet_model.predict(resnet_input)
-    
-    gb_input = preprocess_image_gb(image)
-    gb_prediction = gradientboost_model.predict(gb_input)
-    
-    return resnet_prediction, gb_prediction
+# Preprocessing function for deep learning model
+def preprocess_for_deep_learning(img, input_size):
+    nimg = img.convert('RGB').resize(input_size, resample=0)
+    img_arr = (np.array(nimg)) / 255
+    return img_arr
+
+def reshape(imgs_arr):
+    return np.stack(imgs_arr, axis=0)
+
+# Function to extract features for machine learning model
+def extract_features(image):
+    image = np.array(image * 255, dtype=np.uint8)
+
+    glcm = greycomatrix(image[..., 0], distances=[1], angles=[0], symmetric=True, normed=True)
+    glcm_props = greycoprops(glcm, 'dissimilarity')[0]
+
+    r, g, b = cv2.split(image)
+    rgb_features = [
+        np.mean(r), np.std(r),
+        np.mean(g), np.std(g),
+        np.mean(b), np.std(b)
+    ]
+
+    return np.hstack((glcm_props, rgb_features))
 
 # Streamlit app
 st.title('Red Meat Classification')
@@ -45,26 +52,44 @@ if uploaded_file is not None:
     st.write("")
     st.write("Classifying...")
 
-    resnet_pred, gb_pred = classify_image(uploaded_file)
+    # Load and preprocess the image for deep learning model
+    img_for_deep_learning = Image.open(uploaded_file)
+    X = preprocess_for_deep_learning(img_for_deep_learning, img_size_224p)
+    X = reshape([X])
+    y = deep_learning_model.predict(X)
 
-    # Display ResNet prediction and accuracy
-    st.write("ResNet Model Prediction:")
-    resnet_class = np.argmax(resnet_pred)
-    resnet_labels = {0: 'Pig', 1: 'Goat', 2: 'Cow'}
-    st.write(f"Predicted Class: {resnet_labels[resnet_class]}")
-    st.write(f"Prediction Probabilities: {resnet_pred.squeeze()}")
-    st.write("")
+    plt.imshow(img_for_deep_learning)
+    plt.show()
+    st.write(labels[np.argmax(y)], np.max(y))
 
-    # Display Gradient Boosting prediction and accuracy
-    st.write("Gradient Boosting Model Prediction:")
-    gb_class = np.argmax(gb_pred)
-    gb_labels = {0: 'Pig', 1: 'Goat', 2: 'Cow'}
-    st.write(f"Predicted Class: {gb_labels[gb_class]}")
-    st.write(f"Prediction Probabilities: {gb_pred}")
-    st.write("")
+    # Load and preprocess the image for machine learning model
+    test_image = cv2.cvtColor(np.array(img_for_deep_learning), cv2.COLOR_RGB2BGR)
+    test_image = cv2.resize(test_image, (224, 224))
+    test_image = (np.array(test_image) / 255.0)
+    test_features = extract_features(test_image)
 
-    # Calculate and display average accuracy
-    resnet_accuracy = accuracy_score([resnet_class], [true_label])  # Replace true_label with the actual label
-    gb_accuracy = accuracy_score([gb_class], [true_label])  # Replace true_label with the actual label
-    average_accuracy = (resnet_accuracy + gb_accuracy) / 2
-    st.write(f"Average Accuracy: {average_accuracy}")
+    # Prediction using both models
+    predicted_class_deep_learning = np.argmax(y)
+    predicted_class_machine_learning = loaded_model.predict(test_features.reshape(1, -1))
+
+    # Get label indices for each model's prediction
+    index_deep_learning = predicted_class_deep_learning
+    index_machine_learning = predicted_class_machine_learning[0]
+
+    # Combine predictions
+    if index_deep_learning == index_machine_learning:
+        final_prediction = labels[index_deep_learning]
+    else:
+        final_prediction = "Prediksi salah dari setidaknya satu model."
+
+    # Calculate average accuracy percentage
+    accuracy_deep_learning = np.max(y) * 100
+    accuracy_machine_learning = 0
+    if index_machine_learning == index_deep_learning:
+        accuracy_machine_learning = 100
+
+    average_accuracy = (accuracy_deep_learning + accuracy_machine_learning) / 2
+
+    # Final prediction and average accuracy
+    st.write(f'Hasil prediksi: {final_prediction}')
+    st.write(f'Akurasi: {average_accuracy}%')
