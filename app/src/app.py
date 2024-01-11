@@ -1,7 +1,6 @@
-import base64
 import streamlit as st
-import numpy as np
 import cv2
+import numpy as np
 import keras, joblib, io
 import tensorflow as tf
 import matplotlib.pyplot as plt
