@@ -1,10 +1,10 @@
 import streamlit as st
 import numpy as np
 import pickle
-import matplotlib.pyplot as plt
+import cv2
 import keras, joblib, io
 import tensorflow as tf
-import cv2
+import matplotlib.pyplot as plt
 from PIL import Image
 from skimage.feature import graycomatrix, graycoprops
 
