@@ -1,8 +1,6 @@
 import base64
-
 import streamlit as st
 import numpy as np
-import pickle
 import cv2
 import keras, joblib, io
 import tensorflow as tf
@@ -15,9 +13,6 @@ deep_learning_model = keras.models.load_model('./resnet.h5')
 
 # Load machine learning model
 loaded_model = joblib.load('./best_adaboost.pkl')
-#loading the trained model
-# pickle_in=open('./best_adaboost.pkl','rb')
-# loaded_model=pickle.load(pickle_in)
 
 labels = ['babi', 'kambing', 'sapi']
 img_size_224p = (224, 224)
