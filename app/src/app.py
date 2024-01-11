@@ -8,7 +8,7 @@ import joblib
 import matplotlib.pyplot as plt
 
 # Load deep learning model
-deep_learning_model = load_model('./mobilenet_86persen.h5')
+deep_learning_model = load_model('./resnet.h5')
 
 # Load machine learning model
 loaded_model = joblib.load('./best_adaboost.pkl')
