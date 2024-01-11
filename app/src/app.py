@@ -6,6 +6,7 @@ import pickle
 import matplotlib.pyplot as plt
 import keras, joblib, io
 import tensorflow as tf
+import cv2
 
 # Load deep learning model
 deep_learning_model = keras.models.load_model('./resnet.h5')
