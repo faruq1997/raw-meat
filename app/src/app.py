@@ -1,12 +1,12 @@
 import streamlit as st
 import numpy as np
-from PIL import Image
-from skimage.feature import graycomatrix, graycoprops
 import pickle
 import matplotlib.pyplot as plt
 import keras, joblib, io
 import tensorflow as tf
 import cv2
+from PIL import Image
+from skimage.feature import graycomatrix, graycoprops
 
 # Load deep learning model
 deep_learning_model = keras.models.load_model('./resnet.h5')
