@@ -1,0 +1,3 @@
+0 babi
+1 kambing
+2 sapi
