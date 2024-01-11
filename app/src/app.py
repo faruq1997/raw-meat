@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 from PIL import Image
-from skimage.feature import greycomatrix, greycoprops
+from skimage.feature import graycomatrix, graycoprops
 import pickle
 import matplotlib.pyplot as plt
 import keras, joblib, io
@@ -32,8 +32,8 @@ def reshape(imgs_arr):
 def extract_features(image):
     image = np.array(image * 255, dtype=np.uint8)
 
-    glcm = greycomatrix(image[..., 0], distances=[1], angles=[0], symmetric=True, normed=True)
-    glcm_props = greycoprops(glcm, 'dissimilarity')[0]
+    glcm = graycomatrix(image[..., 0], distances=[1], angles=[0], symmetric=True, normed=True)
+    glcm_props = graycoprops(glcm, 'dissimilarity')[0]
 
     r, g, b = cv2.split(image)
     rgb_features = [
