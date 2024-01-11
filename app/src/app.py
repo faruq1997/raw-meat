@@ -1,19 +1,20 @@
 import streamlit as st
 import numpy as np
-import tensorflow as tf
 from PIL import Image
 from skimage.feature import greycomatrix, greycoprops
 import pickle
 import matplotlib.pyplot as plt
+import keras, joblib, io
+import tensorflow as tf
 
 # Load deep learning model
 deep_learning_model = keras.models.load_model('./resnet.h5')
 
 # Load machine learning model
-#loaded_model = joblib.load('./best_adaboost.pkl')
+loaded_model = joblib.load('./best_adaboost.pkl')
 #loading the trained model
-pickle_in=open('./best_adaboost.pkl','rb')
-loaded_model=pickle.load(pickle_in)
+# pickle_in=open('./best_adaboost.pkl','rb')
+# loaded_model=pickle.load(pickle_in)
 
 labels = ['babi', 'kambing', 'sapi']
 img_size_224p = (224, 224)
