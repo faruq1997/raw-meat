@@ -1,14 +1,14 @@
 import streamlit as st
-from keras.models import load_model
 import cv2
 import numpy as np
+import tensorflow as tf
 from PIL import Image
 from skimage.feature import greycomatrix, greycoprops
 import joblib
 import matplotlib.pyplot as plt
 
 # Load deep learning model
-deep_learning_model = load_model('./resnet.h5')
+deep_learning_model = keras.models.load_model('./resnet.h5')
 
 # Load machine learning model
 loaded_model = joblib.load('./best_adaboost.pkl')
